@@ -9,8 +9,8 @@ Author: Shriraj PETHE.
 ## Features
 
 - Fetches the webpage content from a user-provided URL
-- Parses the HTML content and extracts all tags
-- Saves tag data in a CSV file with a unique timestamped filename
+- Parses the HTML content and extracts all tags, text, classes, ids etc.
+- Saves data in a CSV file with a unique timestamped filename
 
 ## Prerequisites
 
