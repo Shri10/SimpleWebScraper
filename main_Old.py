@@ -2,6 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 from datetime import datetime
+from urllib.parse import urljoin
+
+def extract_attributes(tag):
+    attributes = {}
+    for attr, value in tag.attrs.items():
+        attributes[attr] = ' '.join(value) if isinstance(value, list) else value
+    return attributes
 
 # Prompt the user for a URL
 url = input("Enter the URL: ")
@@ -23,20 +30,23 @@ filename = f'scraped_data_{now.strftime("%Y%m%d_%H%M%S")}.csv'
 
 # Save the data to a CSV file
 with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-    fieldnames = ['Tag', 'Class', 'ID', 'Text', 'URL']
+    fieldnames = ['Tag', 'Text', 'Attributes', 'Class', 'ID', 'URL']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
     writer.writeheader()
     for tag in found_tags:
         text_content = tag.get_text(strip=True)
-
-        # Extract class and ID information
-        class_names = ' '.join(tag['class']) if tag.has_attr('class') else ''
-        tag_id = tag['id'] if tag.has_attr('id') else ''
+        attributes = extract_attributes(tag)
+        class_name = attributes.get('class', '')
+        id_name = attributes.get('id', '')
 
         # Check if the tag has a 'href' attribute
-        link = tag.get('href', '')
+        relative_link = tag.get('href', None)
+        if relative_link:
+            link = urljoin(url, relative_link)
+        else:
+            link = ''
 
-        writer.writerow({'Tag': tag.name, 'Class': class_names, 'ID': tag_id, 'Text': text_content, 'URL': link})
+        writer.writerow({'Tag': tag.name, 'Text': text_content, 'Attributes': attributes, 'Class': class_name, 'ID': id_name, 'URL': link})
 
 print(f"Data saved to {filename}")
